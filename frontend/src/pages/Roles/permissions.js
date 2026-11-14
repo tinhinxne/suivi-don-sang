@@ -1,0 +1,15 @@
+export const PERMISSIONS = [
+  'Créer les comptes du personnel',
+  'Attribuer les rôles',
+  'Gérer les accès',
+  'Consulter ses informations',
+  'Consulter ses dons',
+  'Consulter le stock',
+  'Créer et suivre ses demandes',
+  'Gérer les donneurs',
+  'Gérer les dons',
+  'Gérer les analyses',
+  'Gérer le stock',
+  'Gérer les demandes',
+  'Gérer les distributions',
+]

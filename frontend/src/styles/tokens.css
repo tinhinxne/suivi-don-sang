@@ -1,0 +1,26 @@
+:root {
+  --burgundy-900: #4e0d1e;
+  --burgundy-800: #5a1226;
+  --burgundy-600: #7b1a38;
+  --burgundy-500: #8a1c3a;
+
+  --rose-100: #f8e6e4;
+  --cream: #fffaf7;
+  --field: #fcfaf8;
+  --border: #f0dddb;
+
+  --ink: #1f0b11;
+  --muted: #a67f87;
+  --on-dark: #ffffff;
+  --on-dark-muted: #d9bfc4;
+  --gold-soft: #e8c9a8;
+
+  --font-title: 'Cormorant Garamond', Georgia, serif;
+  --font-body: 'DM Sans', system-ui, sans-serif;
+  --font-arabic: 'Noto Naskh Arabic', 'Segoe UI', Tahoma, sans-serif;
+
+  --radius: 10px;
+  --shadow-button: 0 10px 24px rgba(123, 26, 56, 0.28);
+    --app-bg: #f2eeeb;
+  --shadow-card: 0 1px 2px rgba(60, 20, 30, 0.06), 0 8px 24px rgba(60, 20, 30, 0.05);
+}

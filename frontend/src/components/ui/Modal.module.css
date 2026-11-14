@@ -1,0 +1,155 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(31, 11, 17, 0.45);
+  backdrop-filter: blur(2px);
+}
+
+.dialog {
+  position: relative;
+  width: 100%;
+  max-width: 440px;
+  max-height: calc(100vh - 48px);
+  padding: 28px;
+  overflow-y: auto;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 24px 60px rgba(31, 11, 17, 0.28);
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.groupLabel {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.checks {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 12px;
+  background: var(--field);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.checksInvalid {
+  border-color: #c0392b;
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.check input {
+  width: 15px;
+  height: 15px;
+  accent-color: var(--burgundy-600);
+  cursor: pointer;
+}
+
+.error {
+  font-size: 11px;
+  color: #c0392b;
+}
+.close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  color: var(--muted);
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.close:hover {
+  color: var(--burgundy-600);
+}
+
+.iconBox {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  margin-bottom: 16px;
+  color: var(--burgundy-600);
+  background: #f8e6e4;
+  border-radius: 10px;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-title);
+  font-size: 26px;
+  font-weight: 500;
+}
+
+.sub {
+  margin: 6px 0 20px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.cancel,
+.confirm {
+  height: 40px;
+  padding: 0 18px;
+  font-size: 12px;
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+
+.cancel {
+  font-weight: 500;
+  color: var(--ink);
+  background: #fff;
+  border: 1px solid var(--border);
+}
+
+.cancel:hover {
+  background: #faf3f1;
+}
+
+.confirm {
+  font-weight: 600;
+  color: #fff;
+  background: var(--burgundy-600);
+  border: 0;
+  box-shadow: var(--shadow-button);
+}
+
+.confirm:hover {
+  background: var(--burgundy-500);
+}
