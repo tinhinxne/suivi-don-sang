@@ -1,6 +1,10 @@
+import { useContext } from 'react'
+import { UserContext } from './UserContext'
 import styles from './Layout.module.css'
 
 export default function PageHeader({ title, subtitle }) {
+  const user = useContext(UserContext)
+
   return (
     <header className={styles.header}>
       <div>
@@ -8,8 +12,8 @@ export default function PageHeader({ title, subtitle }) {
         <p className={styles.pageSub}>{subtitle}</p>
       </div>
       <div className={styles.who}>
-        <span>tinhinane belarbi</span>
-        <span className={styles.pill}>Administrateur</span>
+        <span>{user.name}</span>
+        <span className={styles.pill}>{user.roleLabel}</span>
       </div>
     </header>
   )

@@ -21,7 +21,17 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 4px 8px 28px;
+  margin-bottom: 18px;
+  padding: 4px 8px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.section {
+  padding: 0 12px 10px;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  color: var(--on-dark-muted);
 }
 
 .brandName {

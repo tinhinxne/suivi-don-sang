@@ -1,16 +1,9 @@
 import { NavLink, useNavigate } from 'react-router-dom'
-import { LayoutGrid, Users, ShieldCheck, Settings, LogOut } from 'lucide-react'
+import { LogOut } from 'lucide-react'
 import goutte from '../../assets/icons/goutte.svg'
 import styles from './Layout.module.css'
 
-const items = [
-  { to: '/dashboard', label: 'Tableau de bord', icon: LayoutGrid },
-  { to: '/personnel', label: 'Personnel', icon: Users },
-  { to: '/roles', label: 'Rôles et permissions', icon: ShieldCheck },
-  { to: '/parametres', label: 'Paramètres', icon: Settings },
-]
-
-export default function Sidebar() {
+export default function Sidebar({ nav, user }) {
   const navigate = useNavigate()
 
   return (
@@ -22,9 +15,9 @@ export default function Sidebar() {
           <div className={styles.brandTag}>Traçabilité du don</div>
         </div>
       </div>
-
+      <div className={styles.section}>{user.roleLabel.toUpperCase()}</div>
       <nav className={styles.nav}>
-        {items.map(({ to, label, icon: Icon }) => (
+        {nav.map(({ to, label, icon: Icon }) => (
           <NavLink
             key={to}
             to={to}
@@ -40,10 +33,10 @@ export default function Sidebar() {
 
       <div className={styles.user}>
         <div className={styles.userRow}>
-          <div className={styles.avatar}>TB</div>
+          <div className={styles.avatar}>{user.initials}</div>
           <div>
-            <div className={styles.userName}>tinhinane belarbi</div>
-            <div className={styles.userRole}>Administrateur</div>
+            <div className={styles.userName}>{user.name}</div>
+            <div className={styles.userRole}>{user.roleLabel}</div>
           </div>
         </div>
 
