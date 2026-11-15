@@ -1,0 +1,11 @@
+.tag {
+  display: inline-block;
+  min-width: 34px;
+  padding: 4px 8px;
+  font-size: 10px;
+  font-weight: 600;
+  text-align: center;
+  color: var(--burgundy-600);
+  background: var(--rose-100);
+  border-radius: 6px;
+}

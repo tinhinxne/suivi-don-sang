@@ -1,0 +1,40 @@
+.card {
+  display: flex;
+  gap: 14px;
+  padding: 18px 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+}
+
+.icon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+}
+
+.rose  { background: var(--rose-100); color: var(--burgundy-600); }
+.amber { background: var(--amber-bg); color: var(--amber-ink); }
+.green { background: var(--green-bg); color: var(--green-ink); }
+
+.label {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.value {
+  margin: 4px 0 6px;
+  font-size: 28px;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--ink);
+}
+
+.hint {
+  font-size: 10px;
+  color: var(--muted);
+}

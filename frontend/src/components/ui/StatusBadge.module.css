@@ -1,0 +1,38 @@
+.badge {
+  display: inline-block;
+  padding: 4px 10px;
+  font-size: 9px;
+  font-weight: 600;
+  white-space: nowrap;
+  border-radius: 999px;
+}
+
+.pending {
+  color: var(--orange-ink);
+  background: var(--orange-bg);
+}
+
+.accepted {
+  color: var(--teal-ink);
+  background: var(--teal-bg);
+}
+
+.rejected {
+  color: var(--red-ink);
+  background: var(--red-bg);
+}
+
+.available {
+  color: var(--green-ink);
+  background: var(--green-bg);
+}
+
+.reserved {
+  color: var(--amber-ink);
+  background: var(--amber-bg);
+}
+
+.distributed {
+  color: var(--blue-ink);
+  background: var(--blue-bg);
+}

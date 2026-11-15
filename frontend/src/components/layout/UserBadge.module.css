@@ -1,0 +1,21 @@
+.badge {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.name {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.pill {
+  padding: 3px 10px;
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--blue-ink);
+  background: var(--blue-bg);
+  border: 1px solid var(--blue-border);
+  border-radius: 999px;
+}

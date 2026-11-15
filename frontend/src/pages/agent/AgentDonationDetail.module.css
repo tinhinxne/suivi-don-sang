@@ -1,0 +1,224 @@
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px 24px;
+}
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  align-self: flex-start;
+  font-size: 9px;
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.back:hover {
+  color: var(--ink);
+}
+
+.notFound {
+  padding: 28px;
+  font-size: 11px;
+  text-align: center;
+  color: var(--muted);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+/* Carte d'identité */
+.summary {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 22px 24px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+}
+
+.iconBox {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  color: var(--burgundy-600);
+  background: var(--rose-100);
+  border-radius: 10px;
+}
+
+.identity {
+  flex: 1;
+}
+
+.eyebrow {
+  margin-bottom: 6px;
+  font-size: 7px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.bagId {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.bagMeta {
+  margin: 6px 0 0;
+  font-size: 9px;
+  color: var(--muted);
+}
+
+.dot {
+  margin: 0 4px;
+}
+
+.facts {
+  display: flex;
+  align-items: stretch;
+}
+
+.fact {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 0 28px;
+}
+
+.fact + .fact {
+  border-left: 1px solid var(--border);
+}
+
+.factValue {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+/* Parcours */
+.journey {
+  width: 100%;
+  max-width: 620px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+}
+
+.journeyHead {
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.journeyTitle {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.journeySub {
+  margin: 4px 0 0;
+  font-size: 9px;
+  color: var(--muted);
+}
+
+.timeline {
+  margin: 0;
+  padding: 22px 20px 26px;
+  list-style: none;
+}
+
+.step {
+  position: relative;
+  display: flex;
+  gap: 14px;
+  padding-bottom: 26px;
+}
+
+.step:last-child {
+  padding-bottom: 0;
+}
+
+/* Trait vertical entre deux étapes */
+.step:not(:last-child)::before {
+  content: '';
+  position: absolute;
+  top: 28px;
+  bottom: 0;
+  left: 13px;
+  width: 1px;
+  background: var(--border);
+}
+
+.circle {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  color: var(--muted);
+  background: var(--field);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+}
+
+.circleDone {
+  color: var(--green-ink);
+  background: var(--green-bg);
+  border-color: var(--green-line);
+}
+
+.circleRejected {
+  color: var(--red-ink);
+  background: var(--red-bg);
+  border-color: var(--red-border);
+}
+
+.stepTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--ink);
+}
+
+.tag {
+  padding: 2px 7px;
+  font-size: 7px;
+  font-weight: 600;
+  border-radius: 999px;
+}
+
+.tagDone {
+  color: var(--green-ink);
+  background: var(--green-bg);
+}
+
+.tagRejected {
+  color: var(--red-ink);
+  background: var(--red-bg);
+}
+
+.stepWait {
+  margin-top: 6px;
+  font-size: 9px;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.stepMeta {
+  margin-top: 6px;
+  font-size: 8px;
+  color: var(--muted);
+}

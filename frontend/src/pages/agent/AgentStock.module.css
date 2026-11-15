@@ -1,0 +1,212 @@
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px 24px;
+}
+
+/* Cartes par groupe */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+.card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 16px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-bottom-width: 3px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+}
+
+.ok {
+  border-bottom-color: var(--green-ink);
+}
+
+.low {
+  border-bottom-color: var(--burgundy-600);
+}
+
+.count {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--ink);
+}
+
+.countLabel {
+  margin-top: 4px;
+  font-size: 8px;
+  color: var(--muted);
+}
+
+/* Bandeau « à ajouter au stock » */
+.banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  background: var(--green-soft);
+  border: 1px solid var(--green-line);
+  border-radius: var(--radius);
+}
+
+.bannerIcon {
+  flex-shrink: 0;
+  color: var(--green-ink);
+}
+
+.bannerText {
+  flex: 1;
+}
+
+.bannerTitle {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.bannerSub {
+  margin-top: 3px;
+  font-size: 8px;
+  color: var(--muted);
+}
+
+.bannerBtn {
+  padding: 10px 18px;
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.bannerBtn:hover {
+  background: var(--field);
+}
+
+/* Tableau */
+.table {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+
+.tableHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px;
+}
+
+.tableTitle {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.selectWrap {
+  position: relative;
+}
+
+.select {
+  appearance: none;
+  min-width: 96px;
+  padding: 7px 30px 7px 12px;
+  font-family: var(--font-body);
+  font-size: 10px;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.select:focus {
+  outline: none;
+  border-color: var(--burgundy-600);
+}
+
+.chevron {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  color: var(--ink);
+  pointer-events: none;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1.4fr 1fr;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  border-top: 1px solid var(--border);
+}
+
+.head {
+  padding-top: 10px;
+  padding-bottom: 10px;
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  background: var(--field);
+}
+
+.id {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.cell {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.empty {
+  padding: 24px 20px;
+  font-size: 11px;
+  text-align: center;
+  color: var(--muted);
+  border-top: 1px solid var(--border);
+}
+
+/* Pastilles d'état */
+.pill {
+  display: inline-block;
+  padding: 4px 10px;
+  font-size: 9px;
+  font-weight: 600;
+  border-radius: 999px;
+}
+
+.available {
+  color: var(--green-ink);
+  background: var(--green-bg);
+}
+
+.reserved {
+  color: var(--amber-ink);
+  background: var(--amber-bg);
+}
+
+.distributed {
+  color: var(--blue-ink);
+  background: var(--blue-bg);
+}

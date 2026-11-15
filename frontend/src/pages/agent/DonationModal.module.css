@@ -1,0 +1,54 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.label {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 11px 12px;
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--burgundy-600);
+}
+
+select.input {
+  appearance: none;
+  padding-right: 34px;
+  cursor: pointer;
+}
+
+.selectWrap {
+  position: relative;
+}
+
+.chevron {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  color: var(--ink);
+  pointer-events: none;
+}

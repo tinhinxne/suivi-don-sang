@@ -15,6 +15,38 @@
   --on-dark-muted: #d9bfc4;
   --gold-soft: #e8c9a8;
 
+  /* Surfaces */
+  --surface: #ffffff;
+
+  /* Icônes des cartes de stats */
+  --amber-bg: #fdf0d5;
+  --amber-ink: #c98a1b;
+  --green-bg: #e3f4ea;
+  --green-ink: #2f9e6a;
+
+  /* Pastille de rôle (en-tête) */
+  --blue-bg: #e3effd;
+  --blue-border: #9cc3f0;
+  --blue-ink: #2b5fa8;
+
+    /* Bandeau d'avertissement */
+  --warn-bg: #fff3d6;
+  --warn-border: #f3dfa6;
+  --warn-ink: #a35a00;
+
+  /* button rejet */
+    --red-bg: #fde7e5;
+  --red-border: #e0615a;
+  --red-ink: #c0392b;
+
+    --green-soft: #f1faf5;
+  --green-line: #8cc9a8;
+
+    --orange-bg: #ffe8d2;
+  --orange-ink: #b85a0a;
+  --teal-bg: #ddf3f0;
+  --teal-ink: #1f7f78;
+
   --font-title: 'Cormorant Garamond', Georgia, serif;
   --font-body: 'DM Sans', system-ui, sans-serif;
   --font-arabic: 'Noto Naskh Arabic', 'Segoe UI', Tahoma, sans-serif;

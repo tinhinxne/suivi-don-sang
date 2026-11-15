@@ -1,0 +1,99 @@
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px 24px;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.sub {
+  margin: 4px 0 0;
+  font-size: 9px;
+  color: var(--ink);
+}
+
+/* Double classe : prend le dessus sur le style global .btn */
+.head .addBtn {
+  width: auto;
+  margin: 0;
+}
+
+.table {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1.6fr 1.4fr 1.2fr 2fr 0.7fr 1.4fr 24px;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 14px 20px;
+}
+
+.thead {
+  padding-top: 10px;
+  padding-bottom: 10px;
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  background: var(--field);
+}
+
+/* Ligne cliquable : on neutralise le style natif du bouton */
+.item {
+  font-family: var(--font-body);
+  text-align: left;
+  background: var(--surface);
+  border: none;
+  border-top: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.item:hover {
+  background: var(--field);
+}
+
+.idCell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.drop {
+  flex-shrink: 0;
+  color: var(--burgundy-600);
+}
+
+.cell {
+  font-size: 10px;
+  color: var(--muted);
+}
+
+.chevron {
+  color: var(--ink);
+}
