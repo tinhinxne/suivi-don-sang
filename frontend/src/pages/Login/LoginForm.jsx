@@ -5,16 +5,40 @@ import Checkbox from '../../components/ui/Checkbox'
 import Button from '../../components/ui/Button'
 import styles from './LoginPage.module.css'
 
+const API_URL = 'http://localhost:3000/api'
+
 export default function LoginForm() {
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [remember, setRemember] = useState(true)
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault()
-    // TODO : appeler services/api.js avant de rediriger
-    navigate('/dashboard')
+    setError('')
+    setLoading(true)
+    try {
+      const res = await fetch(`${API_URL}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setError(data.error || 'Erreur de connexion')
+        return
+      }
+      const storage = remember ? localStorage : sessionStorage
+      storage.setItem('token', data.token)
+      storage.setItem('user', JSON.stringify(data.user))
+      navigate('/dashboard')
+    } catch {
+      setError('Serveur injoignable')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -54,7 +78,10 @@ export default function LoginForm() {
         onChange={(e) => setRemember(e.target.checked)}
       />
 
-      <Button type="submit" withArrow>Se connecter</Button>
+     {error && <p className="field__error" role="alert">{error}</p>}
+      <Button type="submit" withArrow disabled={loading}>
+        {loading ? 'Connexion…' : 'Se connecter'}
+      </Button>
     </form>
   )
 }

@@ -94,6 +94,18 @@
 .btn:active {
   transform: translateY(1px);
 }
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn:disabled:hover {
+  background: var(--burgundy-600);
+}
+
+.btn:disabled:active {
+  transform: none;
+}
 .field__input[aria-invalid='true'] {
   border-color: #c0392b;
 }
