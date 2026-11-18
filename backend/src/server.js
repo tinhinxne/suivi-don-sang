@@ -7,7 +7,11 @@ const db = require('./db');
 
 const app = express();
 app.use(helmet());
-app.use(cors({ origin: process.env.FRONTEND_URL || 'http://localhost:5173' }));
+// Accepte le front sur n'importe quel port local (5173, 5174, ...) en développement.
+// En production, définir FRONTEND_URL dans le .env.
+app.use(cors({
+  origin: process.env.FRONTEND_URL || /^http:\/\/(localhost|127\.0\.0\.1):\d+$/,
+}));
 app.use(express.json());
 app.use(morgan('dev'));
 
