@@ -248,86 +248,230 @@
 
 
 
+// // DEMO MINIMAL
+// import { network } from "hardhat";
+
+// const { ethers } = await network.create();
+
+// const GROUPES = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
+// const STATUTS = ["Enregistre", "EnAnalyse", "Valide", "Rejete", "Stocke", "Distribue"];
+
+// const ID = ethers.id("don-44");
+// const DONNEUR = ethers.id("donneur-pseudo-1");
+// const HASH = ethers.id("resultats-analyse");
+// const DEST = ethers.id("hopital-1");
+
+// const [admin, centre, labo] = await ethers.getSigners();
+
+// console.log("=== 1. Deploiement ===");
+// const c = await ethers.deployContract("SuiviDonSang");
+// console.log("Contrat deploye a l'adresse :", await c.getAddress());
+// console.log("Admin  :", admin.address);
+
+// await c.grantRole(await c.CENTRE_ROLE(), centre.address);
+// await c.grantRole(await c.LABORATOIRE_ROLE(), labo.address);
+// console.log("Agent centre :", centre.address, "(badge CENTRE)");
+// console.log("Agent labo   :", labo.address, "(badge LABORATOIRE)");
+
+// async function etat(titre: string) {
+//   const d = await c.getDon(ID);
+//   console.log(`   -> Etat du don 44 : ${STATUTS[Number(d.statut)]} | groupe ${GROUPES[Number(d.groupe)]}`);
+// }
+
+// console.log("\n=== 2. Le centre enregistre un don (groupe O+ par erreur) ===");
+// await c.connect(centre).enregistrerDon(ID, DONNEUR, 6);
+// await etat("apres enregistrement");
+
+// console.log("\n=== 3. Test d'une action INTERDITE : distribuer tout de suite ===");
+// try {
+// await c.connect(centre).distribuerDon(ID, DEST, 6);  console.log("   !! ACCEPTE (ce n'est pas normal)");
+// } catch (e: any) {
+//   console.log("   -> REFUSE par le contrat :", e.shortMessage ?? e.message);
+// }
+
+// console.log("\n=== 4. Correction du groupe : O+ devient A+ ===");
+// await c.connect(centre).corrigerGroupe(ID, 0, "erreur de saisie");
+// await etat("apres correction");
+
+// console.log("\n=== 5. Le labo analyse, valide ===");
+// await c.connect(labo).demarrerAnalyse(ID);
+// await etat("apres demarrage analyse");
+// await c.connect(labo).validerDon(ID, HASH);
+// await etat("apres validation");
+
+// console.log("\n=== 6. Le centre stocke, puis essaie de donner la poche A+ a un patient B- ===");
+// await c.connect(centre).stockerDon(ID);
+// await etat("apres stockage");
+// try {
+//   await c.connect(centre).distribuerDon(ID, DEST, 3);
+//   console.log("   !! ACCEPTE (pas normal)");
+// } catch (e: any) {
+//   console.log("   -> poche A+ vers patient B- : REFUSE :", e.shortMessage ?? e.message);
+// }
+// await etat("apres le refus (toujours stocke)");
+// console.log("\n   Puis distribution a un patient A+ (compatible)");
+// await c.connect(centre).distribuerDon(ID, DEST, 0);
+// await etat("apres distribution");
+
+
+
+// console.log("\n=== 7. HISTORIQUE complet du don 44 (lu sur la blockchain) ===");
+// const noms = ["DonEnregistre", "GroupeCorrige", "AnalyseDemarree", "DonValide", "DonStocke", "DonDistribue"];
+// let evenements: any[] = [];
+// for (const nom of noms) {
+//   const liste = await c.queryFilter((c.filters as any)[nom](ID));
+//   evenements = evenements.concat(liste);
+// }
+// evenements.sort((a, b) => a.blockNumber - b.blockNumber || a.index - b.index);
+// for (const ev of evenements) {
+//   const qui = ev.args.par === centre.address ? "agent centre" : ev.args.par === labo.address ? "agent labo" : ev.args.par;
+//   let detail = "";
+//   if (ev.fragment.name === "GroupeCorrige") {
+//     detail = ` | ${GROUPES[Number(ev.args.ancien)]} -> ${GROUPES[Number(ev.args.nouveau)]} | motif : ${ev.args.motif}`;
+//   }
+//   console.log(`   bloc ${ev.blockNumber} | ${ev.fragment.name} | par ${qui}${detail}`);
+// }
+
+
+
 // DEMO MINIMAL
 import { network } from "hardhat";
 
 const { ethers } = await network.create();
 
 const GROUPES = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
-const STATUTS = ["Enregistre", "EnAnalyse", "Valide", "Rejete", "Stocke", "Distribue"];
+const STATUTS = ["Enregistre", "EnAnalyse", "Valide", "Rejete", "Stocke", "Reserve", "Distribue"];
+const STATUTS_DEMANDE = ["EnAttente", "Acceptee", "Refusee", "Annulee"];
 
-const ID = ethers.id("don-44");
 const DONNEUR = ethers.id("donneur-pseudo-1");
+const PATIENT = ethers.id("patient-1");
 const HASH = ethers.id("resultats-analyse");
-const DEST = ethers.id("hopital-1");
 
-const [admin, centre, labo] = await ethers.getSigners();
+// 3 comptes de test : chacun jouera un rôle
+const [admin, agent, medecin] = await ethers.getSigners();
 
-console.log("=== 1. Deploiement ===");
+// ---------- petits outils d'affichage ----------
+function qui(adresse: string) {
+  if (adresse === agent.address) return "agent du centre";
+  if (adresse === medecin.address) return "medecin";
+  if (adresse === admin.address) return "admin";
+  return adresse;
+}
+
+// Essaie une action qui DOIT être refusée par le contrat
+async function essayerInterdit(texte: string, action: Promise<any>) {
+  try {
+    await action;
+    console.log(`   !! ACCEPTE (pas normal) : ${texte}`);
+  } catch (e: any) {
+    console.log(`   -> ${texte} : REFUSE : ${e.shortMessage ?? e.message}`);
+  }
+}
+
+console.log("=== 1. Deploiement et attribution des roles ===");
 const c = await ethers.deployContract("SuiviDonSang");
 console.log("Contrat deploye a l'adresse :", await c.getAddress());
-console.log("Admin  :", admin.address);
+console.log("Admin   :", admin.address, "(celui qui deploie)");
 
-await c.grantRole(await c.CENTRE_ROLE(), centre.address);
-await c.grantRole(await c.LABORATOIRE_ROLE(), labo.address);
-console.log("Agent centre :", centre.address, "(badge CENTRE)");
-console.log("Agent labo   :", labo.address, "(badge LABORATOIRE)");
+// L'admin donne les "badges" avec grantRole
+await c.grantRole(await c.AGENT_ROLE(), agent.address);
+await c.grantRole(await c.MEDECIN_ROLE(), medecin.address);
+console.log("Agent   :", agent.address, "(badge AGENT)");
+console.log("Medecin :", medecin.address, "(badge MEDECIN)");
 
-async function etat(titre: string) {
-  const d = await c.getDon(ID);
-  console.log(`   -> Etat du don 44 : ${STATUTS[Number(d.statut)]} | groupe ${GROUPES[Number(d.groupe)]}`);
+async function etat(id: bigint) {
+  const d = await c.getDon(id);
+  console.log(`   -> Don n°${id} : ${STATUTS[Number(d.statut)]} | groupe ${GROUPES[Number(d.groupe)]}`);
 }
 
-console.log("\n=== 2. Le centre enregistre un don (groupe O+ par erreur) ===");
-await c.connect(centre).enregistrerDon(ID, DONNEUR, 6);
-await etat("apres enregistrement");
-
-console.log("\n=== 3. Test d'une action INTERDITE : distribuer tout de suite ===");
-try {
-await c.connect(centre).distribuerDon(ID, DEST, 6);  console.log("   !! ACCEPTE (ce n'est pas normal)");
-} catch (e: any) {
-  console.log("   -> REFUSE par le contrat :", e.shortMessage ?? e.message);
+async function etatDemande(demandeId: bigint) {
+  const d = await c.getDemande(demandeId);
+  console.log(`   -> Demande n°${demandeId} : ${STATUTS_DEMANDE[Number(d.statut)]}`);
 }
+
+// Amene un nouveau don jusqu'a l'etat Stocke
+async function preparerDonStocke(groupe: number): Promise<bigint> {
+  await c.connect(agent).enregistrerDon(DONNEUR, groupe);
+  const id = await c.compteurDons();
+  await c.connect(agent).demarrerAnalyse(id);
+  await c.connect(agent).validerDon(id, HASH);
+  await c.connect(agent).stockerDon(id);
+  return id;
+}
+
+console.log("\n=== 2. L'agent enregistre un don (groupe O+ par erreur) ===");
+await c.connect(agent).enregistrerDon(DONNEUR, 6);
+const id = await c.compteurDons(); // le contrat a donne l'identifiant tout seul
+console.log("   Identifiant attribue automatiquement :", id.toString());
+await etat(id);
+
+console.log("\n=== 3. Actions INTERDITES ===");
+await essayerInterdit(
+  "le medecin demande la poche alors qu'elle n'est meme pas analysee",
+  c.connect(medecin).demanderPoche(id, PATIENT, 6),
+);
+await essayerInterdit(
+  "le medecin essaie d'enregistrer un don",
+  c.connect(medecin).enregistrerDon(DONNEUR, 0),
+);
 
 console.log("\n=== 4. Correction du groupe : O+ devient A+ ===");
-await c.connect(centre).corrigerGroupe(ID, 0, "erreur de saisie");
-await etat("apres correction");
+await c.connect(agent).corrigerGroupe(id, 0, "erreur de saisie");
+await etat(id);
 
-console.log("\n=== 5. Le labo analyse, valide ===");
-await c.connect(labo).demarrerAnalyse(ID);
-await etat("apres demarrage analyse");
-await c.connect(labo).validerDon(ID, HASH);
-await etat("apres validation");
+console.log("\n=== 5. Analyse et validation (faites par l'agent) ===");
+await c.connect(agent).demarrerAnalyse(id);
+await etat(id);
+await c.connect(agent).validerDon(id, HASH);
+await etat(id);
 
-console.log("\n=== 6. Le centre stocke, puis essaie de donner la poche A+ a un patient B- ===");
-await c.connect(centre).stockerDon(ID);
-await etat("apres stockage");
-try {
-  await c.connect(centre).distribuerDon(ID, DEST, 3);
-  console.log("   !! ACCEPTE (pas normal)");
-} catch (e: any) {
-  console.log("   -> poche A+ vers patient B- : REFUSE :", e.shortMessage ?? e.message);
+console.log("\n=== 6. Stockage ===");
+await c.connect(agent).stockerDon(id);
+await etat(id);
+
+console.log("\n=== 7. Le medecin demande la poche A+ ===");
+await essayerInterdit(
+  "demande pour un patient B- (incompatible)",
+  c.connect(medecin).demanderPoche(id, PATIENT, 3),
+);
+await etat(id); // toujours Stocke
+console.log("\n   Puis demande pour un patient A+ (compatible)");
+await c.connect(medecin).demanderPoche(id, PATIENT, 0);
+const demande1 = await c.compteurDemandes();
+await etat(id); // maintenant Reserve
+await etatDemande(demande1);
+
+console.log("\n=== 8. L'agent accepte la demande : la poche est distribuee ===");
+await c.connect(agent).accepterDemande(demande1);
+await etat(id);
+await etatDemande(demande1);
+
+console.log("\n=== 9. Autre scenario : l'agent REFUSE une demande ===");
+const id2 = await preparerDonStocke(7); // poche O-, compatible avec tout le monde
+await c.connect(medecin).demanderPoche(id2, PATIENT, 4);
+const demande2 = await c.compteurDemandes();
+await etat(id2); // Reserve
+await c.connect(agent).refuserDemande(demande2, "stock reserve aux urgences");
+await etat(id2); // retour a Stocke
+await etatDemande(demande2);
+
+console.log(`\n=== 10. HISTORIQUE complet du don n°${id} (lu sur la blockchain) ===`);
+const historique = await c.getHistorique(id);
+for (const e of historique) {
+  const date = new Date(Number(e.date) * 1000).toLocaleString("fr-FR");
+  console.log(`   ${date} | ${STATUTS[Number(e.statut)]} | par ${qui(e.par)}`);
 }
-await etat("apres le refus (toujours stocke)");
-console.log("\n   Puis distribution a un patient A+ (compatible)");
-await c.connect(centre).distribuerDon(ID, DEST, 0);
-await etat("apres distribution");
-
-
-
-console.log("\n=== 7. HISTORIQUE complet du don 44 (lu sur la blockchain) ===");
-const noms = ["DonEnregistre", "GroupeCorrige", "AnalyseDemarree", "DonValide", "DonStocke", "DonDistribue"];
-let evenements: any[] = [];
-for (const nom of noms) {
-  const liste = await c.queryFilter((c.filters as any)[nom](ID));
-  evenements = evenements.concat(liste);
+// la correction du groupe n'est pas un changement de statut : elle est dans les evenements
+const corrections = await c.queryFilter(c.filters.GroupeCorrige(id));
+for (const ev of corrections) {
+  console.log(
+    `   correction du groupe | ${GROUPES[Number(ev.args.ancien)]} -> ${GROUPES[Number(ev.args.nouveau)]}` +
+      ` | motif : ${ev.args.motif} | par ${qui(ev.args.par)}`,
+  );
 }
-evenements.sort((a, b) => a.blockNumber - b.blockNumber || a.index - b.index);
-for (const ev of evenements) {
-  const qui = ev.args.par === centre.address ? "agent centre" : ev.args.par === labo.address ? "agent labo" : ev.args.par;
-  let detail = "";
-  if (ev.fragment.name === "GroupeCorrige") {
-    detail = ` | ${GROUPES[Number(ev.args.ancien)]} -> ${GROUPES[Number(ev.args.nouveau)]} | motif : ${ev.args.motif}`;
-  }
-  console.log(`   bloc ${ev.blockNumber} | ${ev.fragment.name} | par ${qui}${detail}`);
+
+console.log("\n=== 11. LISTE de tous les dons ===");
+const liste = await c.listerDons(1n, 10n);
+for (const d of liste) {
+  console.log(`   Don n°${d.id} | ${GROUPES[Number(d.groupe)]} | ${STATUTS[Number(d.statut)]}`);
 }
