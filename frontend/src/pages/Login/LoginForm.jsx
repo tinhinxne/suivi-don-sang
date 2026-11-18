@@ -31,9 +31,31 @@ export default function LoginForm() {
         return
       }
       const storage = remember ? localStorage : sessionStorage
+      // storage.setItem('token', data.token)
+      // storage.setItem('user', JSON.stringify(data.user))
+      // navigate('/dashboard')
+
       storage.setItem('token', data.token)
-      storage.setItem('user', JSON.stringify(data.user))
-      navigate('/dashboard')
+storage.setItem('user', JSON.stringify(data.user))
+
+switch (data.user.role?.toLowerCase()) {
+  case 'administrateur':
+    navigate('/dashboard')
+    break
+
+  case 'agent_centre':
+    navigate('/agent/dashboard')
+    break
+
+  case 'medecin':
+    navigate('/medecin/dashboard')
+    break
+
+  default:
+    setError('Rôle utilisateur non reconnu')
+    storage.removeItem('token')
+    storage.removeItem('user')
+}
     } catch {
       setError('Serveur injoignable')
     } finally {
