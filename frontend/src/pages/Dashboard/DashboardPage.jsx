@@ -19,13 +19,21 @@ export default function DashboardPage() {
             <div className={styles.foot}>Tous rôles confondus</div>
           </StatCard>
 
-          <StatCard title="Comptes actifs" icon={Check} tone="green" value={stats.active}>
+          {/* <StatCard title="Comptes actifs" icon={Check} tone="green" value={stats.active}>
             <div className={styles.bar}><span style={{ width: `${activePct}%` }} /></div>
             <div className={styles.foot} style={{ marginTop: 8 }}>
               <span className={`${styles.badge} ${styles.badgeGreen}`}>{activePct} %</span>
               du total
             </div>
-          </StatCard>
+          </StatCard> */}
+
+          <StatCard title="Comptes actifs" icon={Check} tone="green" value={stats.active}>
+  <div className={styles.bar}><span style={{ width: `${activePct}%` }} /></div>
+  <div className={styles.foot}>
+    <span className={`${styles.badge} ${styles.badgeGreen}`}>{activePct} %</span>
+    du total
+  </div>
+</StatCard>
 
           <StatCard title="Comptes désactivés" icon={Clock} tone="orange" value={stats.disabled}>
             <div className={styles.foot}>

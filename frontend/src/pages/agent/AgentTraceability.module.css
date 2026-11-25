@@ -316,3 +316,17 @@
   line-height: 1.5;
   color: var(--muted);
 }
+
+.techToggle {
+  padding: 0;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--burgundy-600);
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.techToggle:hover {
+  text-decoration: underline;
+}

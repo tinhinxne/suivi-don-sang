@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Search, Check, Copy, Link2, ShieldCheck, ShieldAlert, X } from 'lucide-react'
+import { Search, Check, Copy, ShieldCheck, ShieldAlert, X } from 'lucide-react'
 import PageHeader from '../../components/layout/PageHeader'
 import Button from '../../components/ui/Button'
 import { traceRecords } from './mockData'
@@ -24,6 +24,7 @@ export default function AgentTraceability() {
   const [tampered, setTampered] = useState(false)
   const [integrity, setIntegrity] = useState(null) // null | 'ok' | 'broken'
   const [copied, setCopied] = useState(null)
+const [showTech, setShowTech] = useState(false)
 
   const handleSearch = (e) => {
     e.preventDefault()
@@ -98,15 +99,23 @@ export default function AgentTraceability() {
           <div className={styles.grid}>
             {/* Historique */}
             <section className={styles.card}>
+            
               <div className={styles.recordHead}>
-                <div>
-                  <h2 className={styles.recordId}>{record.id}</h2>
-                  <p className={styles.recordSub}>
-                    Groupe {record.group} · {STATUS_LABEL[record.status]}
-                  </p>
-                </div>
-                <Link2 size={16} className={styles.recordIcon} />
-              </div>
+  <div>
+    <h2 className={styles.recordId}>{record.id}</h2>
+    <p className={styles.recordSub}>
+      Groupe {record.group} · {STATUS_LABEL[record.status]}
+    </p>
+  </div>
+  <button
+    type="button"
+    className={styles.techToggle}
+    onClick={() => setShowTech((v) => !v)}
+    aria-pressed={showTech}
+  >
+    {showTech ? 'Masquer les détails techniques' : 'Détails techniques'}
+  </button>
+</div>
 
               <ol className={styles.timeline}>
                 {record.events.map((ev, i) => {
@@ -125,17 +134,20 @@ export default function AgentTraceability() {
                         <div className={styles.stepMeta}>
                           {ev.actor} · {ev.date}
                         </div>
-                        <div className={styles.hashRow}>
-                          <code className={styles.hash}>{shortHash(ev.hash)}</code>
-                          <button
-                            type="button"
-                            className={styles.copy}
-                            onClick={() => handleCopy(ev.hash)}
-                            aria-label="Copier l'empreinte"
-                          >
-                            {copied === ev.hash ? <Check size={12} /> : <Copy size={12} />}
-                          </button>
-                        </div>
+                       
+                        {showTech && (
+  <div className={styles.hashRow}>
+    <code className={styles.hash}>{shortHash(ev.hash)}</code>
+    <button
+      type="button"
+      className={styles.copy}
+      onClick={() => handleCopy(ev.hash)}
+      aria-label="Copier l'empreinte"
+    >
+      {copied === ev.hash ? <Check size={12} /> : <Copy size={12} />}
+    </button>
+  </div>
+)}
                       </div>
                     </li>
                   )
