@@ -1,9 +1,27 @@
+import { useEffect, useState } from 'react'
 import PageHeader from '../../components/layout/PageHeader'
 import layout from '../../components/layout/Layout.module.css'
 import styles from './Medecin.module.css'
-import { stock, LOW_STOCK } from './data'
+import { BLOOD_GROUPS, LOW_STOCK } from './data'
+import { api } from '../../services/api'
 
 export default function StockPage() {
+  const [counts, setCounts] = useState({})
+
+  useEffect(() => {
+    api('/poches/stock')
+      .then((rows) => {
+        const c = {}
+        rows.forEach((r) => {
+          c[r.groupe_sanguin] = Number(r.nb_poches)
+        })
+        setCounts(c)
+      })
+      .catch(() => {})
+  }, [])
+
+  const stock = BLOOD_GROUPS.map((g) => ({ group: g, count: counts[g] || 0 }))
+
   return (
     <>
       <PageHeader title="Poches disponibles" subtitle="Stock consultable par groupe sanguin" />

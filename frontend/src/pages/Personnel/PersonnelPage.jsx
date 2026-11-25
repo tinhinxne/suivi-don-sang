@@ -1,21 +1,15 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Plus } from 'lucide-react'
 import PageHeader from '../../components/layout/PageHeader'
 import layout from '../../components/layout/Layout.module.css'
 import styles from '../../components/ui/DataPanel.module.css'
 import CreateAccountModal from './CreateAccountModal'
+import { api } from '../../services/api'
 
 const ROLE_LABELS = {
   MEDECIN: 'Médecin',
   AGENT_CENTRE: 'Agent du centre',
 }
-
-const initialPeople = [
-  { id: 1, name: 'Dr Amine B.', email: 'amine.b@qatra.dz', role: 'MEDECIN', active: true, lastLogin: "Aujourd'hui, 08:55" },
-  { id: 2, name: 'Dr Sarah K.', email: 'sarah.k@qatra.dz', role: 'MEDECIN', active: true, lastLogin: 'Hier, 16:10' },
-  { id: 3, name: 'Yacine M.', email: 'yacine.m@qatra.dz', role: 'AGENT_CENTRE', active: true, lastLogin: "Aujourd'hui, 09:42" },
-  { id: 4, name: 'Lilia H.', email: 'lilia.h@qatra.dz', role: 'AGENT_CENTRE', active: false, lastLogin: 'Il y a 12 jours' },
-]
 
 function initials(name) {
   return name
@@ -26,22 +20,52 @@ function initials(name) {
     .join('')
 }
 
-export default function PersonnelPage() {
-  const [people, setPeople] = useState(initialPeople)
-  const [open, setOpen] = useState(false)
+const toPerson = (u) => ({
+  id: u.id,
+  name: u.nom,
+  email: u.email,
+  role: u.role.toUpperCase(),
+  active: u.statut === 'actif',
+  lastLogin: u.derniere_connexion || 'Jamais connecté',
+})
 
-  function handleCreate({ name, email, role }) {
-    // TODO : appeler services/api.js
-    setPeople((p) => [
-      ...p,
-      { id: Date.now(), name, email, role, active: true, lastLogin: 'Jamais connecté' },
-    ])
-    setOpen(false)
+export default function PersonnelPage() {
+  const [people, setPeople] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [open, setOpen] = useState(false)
+  const [refresh, setRefresh] = useState(0)
+
+  useEffect(() => {
+    api('/auth/utilisateurs')
+      .then((rows) => {
+        setPeople(rows.filter((u) => u.role !== 'administrateur').map(toPerson))
+        setError('')
+      })
+      .catch((e) => setError(e.message))
+      .finally(() => setLoading(false))
+  }, [refresh])
+
+  async function handleCreate({ name, email, password, role }) {
+    try {
+      await api('/auth/utilisateurs', {
+        method: 'POST',
+        body: { nom: name, email, password, role },
+      })
+      setOpen(false)
+      setRefresh((n) => n + 1)
+    } catch (e) {
+      alert(e.message)
+    }
   }
 
-  function reactivate(id) {
-    // TODO : appeler services/api.js
-    setPeople((p) => p.map((x) => (x.id === id ? { ...x, active: true } : x)))
+  async function changeStatus(id, statut) {
+    try {
+      await api(`/auth/utilisateurs/${id}/statut`, { method: 'PATCH', body: { statut } })
+      setRefresh((n) => n + 1)
+    } catch (e) {
+      alert(e.message)
+    }
   }
 
   return (
@@ -60,6 +84,9 @@ export default function PersonnelPage() {
               Ajouter un compte
             </button>
           </div>
+
+          {loading && <p className={styles.muted}>Chargement…</p>}
+          {error && <p className={styles.muted}>{error}</p>}
 
           <div className={styles.tableWrap}>
             <table className={styles.table}>
@@ -93,9 +120,11 @@ export default function PersonnelPage() {
                     <td className={styles.muted}>{p.lastLogin}</td>
                     <td>
                       {p.active ? (
-                        <button className={styles.action}>Gérer</button>
+                        <button className={styles.action} onClick={() => changeStatus(p.id, 'inactif')}>
+                          Désactiver
+                        </button>
                       ) : (
-                        <button className={styles.action} onClick={() => reactivate(p.id)}>
+                        <button className={styles.action} onClick={() => changeStatus(p.id, 'actif')}>
                           Réactiver
                         </button>
                       )}

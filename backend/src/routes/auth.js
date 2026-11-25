@@ -47,6 +47,16 @@ router.get('/me', authenticate, async (req, res) => {
   if (!rows[0]) return res.status(404).json({ error: 'Utilisateur introuvable' });
   res.json(rows[0]);
 });
-
+router.patch('/utilisateurs/:id/statut', authenticate, requireRole('administrateur'),
+  body('statut').isIn(['actif', 'inactif']), validate,
+  async (req, res) => {
+    if (Number(req.params.id) === req.user.id)
+      return res.status(409).json({ error: 'Vous ne pouvez pas désactiver votre propre compte' });
+    const [r] = await db.query('UPDATE utilisateurs SET statut = ? WHERE id = ?',
+      [req.body.statut, req.params.id]);
+    if (!r.affectedRows) return res.status(404).json({ error: 'Utilisateur introuvable' });
+    res.json({ ok: true });
+  });
+  
 module.exports = router;
 

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Check } from 'lucide-react'
 import PageHeader from '../../components/layout/PageHeader'
@@ -8,33 +8,58 @@ import Select from '../../components/ui/Select'
 import panel from '../../components/ui/DataPanel.module.css'
 import styles from './Medecin.module.css'
 import { useRequests } from './useRequests'
-import { BLOOD_GROUPS, HOSPITALS, URGENCIES } from './data'
+import { BLOOD_GROUPS, URGENCIES } from './data'
+import { api } from '../../services/api'
 
 export default function NewRequestPage() {
   const navigate = useNavigate()
   const { addRequest } = useRequests()
 
+  const [hospitals, setHospitals] = useState([])
   const [form, setForm] = useState({
-    hospital: HOSPITALS[0],
+    hospital: '',
     group: BLOOD_GROUPS[0],
     quantity: '1',
     urgency: URGENCIES[0],
   })
   const [error, setError] = useState('')
 
+  useEffect(() => {
+    api('/hopitaux')
+      .then((rows) => {
+        setHospitals(rows)
+        setForm((f) => ({ ...f, hospital: rows[0]?.nom || '' }))
+      })
+      .catch(() => {})
+  }, [])
+
   function set(field) {
     return (e) => setForm((f) => ({ ...f, [field]: e.target.value }))
   }
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault()
     const quantity = Number(form.quantity)
     if (!Number.isInteger(quantity) || quantity < 1) {
       setError('Saisissez un nombre entier supérieur ou égal à 1.')
       return
     }
-    addRequest({ ...form, quantity })
-    navigate('/medecin/mes-demandes')
+    const hospital = hospitals.find((h) => h.nom === form.hospital)
+    if (!hospital) {
+      alert('Choisissez un hôpital.')
+      return
+    }
+    try {
+      await addRequest({
+        hopitalId: hospital.id,
+        group: form.group,
+        quantity,
+        urgency: form.urgency,
+      })
+      navigate('/medecin/mes-demandes')
+    } catch (err) {
+      alert(err.message)
+    }
   }
 
   return (
@@ -54,7 +79,7 @@ export default function NewRequestPage() {
           <div className={styles.formBody}>
             <Select
               label="Hôpital"
-              options={HOSPITALS}
+              options={hospitals.map((h) => h.nom)}
               value={form.hospital}
               onChange={set('hospital')}
             />

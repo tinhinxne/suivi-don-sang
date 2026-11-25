@@ -2,6 +2,7 @@ import { NavLink, useNavigate } from 'react-router-dom'
 import { LogOut } from 'lucide-react'
 import goutte from '../../assets/icons/goutte.svg'
 import styles from './Layout.module.css'
+import { clearSession } from '../../services/api'
 
 export default function Sidebar({ nav, user }) {
   const navigate = useNavigate()
@@ -40,7 +41,7 @@ export default function Sidebar({ nav, user }) {
           </div>
         </div>
 
-        <button className={styles.logout} onClick={() => navigate('/')}>
+        <button className={styles.logout} onClick={() => { clearSession(); navigate('/') }}>
           <LogOut size={14} strokeWidth={1.8} />
           Se déconnecter
         </button>

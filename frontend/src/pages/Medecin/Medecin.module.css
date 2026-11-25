@@ -206,3 +206,5 @@
   .miniStats,
   .row2 { grid-template-columns: 1fr; }
 }
+.partial { color: #b36a10; background: #fde9cf; }
+.rejected { color: #8a1c1c; background: #fbe3e3; }

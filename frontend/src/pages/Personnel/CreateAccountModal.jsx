@@ -27,8 +27,7 @@ export default function CreateAccountModal({ onClose, onCreate }) {
     if (form.password.length < 8) next.password = '8 caractères minimum.'
     setErrors(next)
     if (Object.keys(next).length) return
-
-    onCreate({ name: form.name.trim(), email: form.email.trim(), role: form.role })
+    onCreate({ name: form.name.trim(), email: form.email.trim(), password: form.password, role: form.role })
   }
 
   return (
