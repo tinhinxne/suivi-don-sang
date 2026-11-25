@@ -30,13 +30,12 @@ contract SuiviDonSang is AccessControl {
         ONeg
     }
 
-    // Conservé pour la cohérence du modèle, même si les demandes
-    // sont gérées par le backend dans l'architecture retenue.
-    enum StatutDemande {
-        EnAttente,
+    // Décision prise par l'agent sur une demande de médecin.
+    // Les demandes elles-mêmes sont gérées dans le backend (MySQL) :
+    // seule la décision est enregistrée sur la chaîne.
+    enum DecisionDemande {
         Acceptee,
-        Refusee,
-        Annulee
+        Refusee
     }
 
     struct Don {
@@ -48,37 +47,22 @@ contract SuiviDonSang is AccessControl {
     }
 
     // Chaque changement de statut conserve l'adresse de l'acteur
-    // qui a effectué l'action (agent dans le parcours actuel).
+    // qui a effectué l'action.
     struct Etape {
         Statut statut;
         address par;
         uint256 date;
     }
 
-    // Conservé pour ne pas supprimer la structure initiale.
-    // Les demandes réelles sont stockées dans la base de données.
-    struct Demande {
-        uint256 id;
-        uint256 donId;
-        address medecin;
-        bytes32 patientId;
-        GroupeSanguin groupePatient;
-        StatutDemande statut;
-        uint256 date;
-    }
-
     uint256 public compteurDons;
-    uint256 public compteurDemandes;
 
     mapping(uint256 => Don) private dons;
     mapping(uint256 => Etape[]) private historiques;
-    mapping(uint256 => Demande) private demandes;
 
-    // Ces mappings restent disponibles pour le suivi des demandes,
-    // mais le parcours actuel utilise demandeDe et medecinDe.
-    mapping(uint256 => uint256) public demandeEnCours;
-    mapping(uint256 => bytes32) public demandeDe; // Poche => référence de demande en base.
-    mapping(uint256 => bytes32) public medecinDe; // Poche => identifiant pseudonymisé du médecin.
+    // Poche => référence de la demande (en base) et médecin demandeur,
+    // renseignés à la réservation, remis à zéro à l'annulation.
+    mapping(uint256 => bytes32) public demandeDe;
+    mapping(uint256 => bytes32) public medecinDe;
 
     event DonEnregistre(
         uint256 indexed donId,
@@ -113,21 +97,14 @@ contract SuiviDonSang is AccessControl {
         uint256 date
     );
 
-    // Événements conservés pour compatibilité avec la structure initiale.
-    event DemandeCreee(
-        uint256 indexed demandeId,
-        uint256 indexed donId,
-        address indexed medecin,
-        bytes32 patientId,
-        GroupeSanguin groupePatient,
-        uint256 date
-    );
-
+    // Décision sur une demande (acceptation ou refus).
+    // donId = 0 si aucune poche n'est concernée (ex. refus faute de stock).
+    // motifHash = keccak256 du motif (0 si acceptée) : le texte reste en base.
     event DemandeTraitee(
-        uint256 indexed demandeId,
         uint256 indexed donId,
-        StatutDemande statut,
-        string motif,
+        bytes32 indexed demandeRef,
+        DecisionDemande decision,
+        bytes32 motifHash,
         address par,
         uint256 date
     );
@@ -282,14 +259,13 @@ contract SuiviDonSang is AccessControl {
     }
 
     // --------------------------------------------------
-    // AGENT : réservation et distribution
+    // AGENT : décision sur les demandes, réservation, distribution
     // Les demandes sont gérées dans le backend (option A).
     // --------------------------------------------------
 
-    // L'agent réserve une poche pour une demande créée par un médecin.
+    // Acceptation d'une demande : l'agent réserve une poche.
     // demandeRef : référence de la demande dans la base de données.
     // medecinId : identifiant pseudonymisé du médecin demandeur.
-    // L'adresse de l'agent est enregistrée dans l'historique et l'événement.
     function reserverPoche(
         uint256 donId,
         bytes32 demandeRef,
@@ -314,6 +290,38 @@ contract SuiviDonSang is AccessControl {
             demandeRef,
             medecinId,
             groupePatient,
+            msg.sender,
+            block.timestamp
+        );
+
+        emit DemandeTraitee(
+            donId,
+            demandeRef,
+            DecisionDemande.Acceptee,
+            bytes32(0),
+            msg.sender,
+            block.timestamp
+        );
+    }
+
+    // Refus d'une demande. Aucun statut n'est modifié et rien n'est stocké :
+    // seul un événement est émis (preuve infalsifiable de la décision).
+    // donId = 0 autorisé quand aucune poche n'est concernée (rupture de stock).
+    // motifHash : keccak256 du motif, le texte reste dans la base de données.
+    function refuserDemande(
+        uint256 donId,
+        bytes32 demandeRef,
+        bytes32 motifHash
+    ) external onlyRole(AGENT_ROLE) {
+        require(donId <= compteurDons, "Don introuvable");
+        require(demandeRef != bytes32(0), "Reference obligatoire");
+        require(motifHash != bytes32(0), "Motif obligatoire");
+
+        emit DemandeTraitee(
+            donId,
+            demandeRef,
+            DecisionDemande.Refusee,
+            motifHash,
             msg.sender,
             block.timestamp
         );

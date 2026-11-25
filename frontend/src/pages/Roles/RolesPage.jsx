@@ -8,22 +8,18 @@ import CreateRoleModal from './CreateRoleModal'
 const initialRoles = [
   {
     code: 'ADMIN',
-    actions: ['Créer les comptes du personnel', 'Attribuer les rôles', 'Gérer les accès'],
+    actions: ['Créer les comptes du personnel', 'Attribuer/retirer les rôles', 'Gérer les accès', 'Consulter le journal d\'audit et l\'historique des dons (lecture seule)'],
     full: true,
   },
-  {
-    code: 'DONNEUR',
-    actions: ['Consulter ses informations', 'Consulter ses dons'],
-    full: false,
-  },
+ 
   {
     code: 'MEDECIN',
-    actions: ['Consulter le stock', 'Créer et suivre ses demandes'],
+    actions: ['Consulter le stock (groupes et statuts uniquement)', 'Créer et suivre et annuler ses demandes'],
     full: false,
   },
   {
     code: 'AGENT_CENTRE',
-    actions: ['Gérer donneurs, dons, analyses, stock, demandes et distributions'],
+    actions: ['Gérer donneurs et dons, analyses, stock, demandes et distributions'],
     full: false,
   },
 ]

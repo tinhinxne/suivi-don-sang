@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import {
   JsonRpcProvider,
   Wallet,
@@ -11,13 +11,12 @@ const artifact = JSON.parse(
   readFileSync("artifacts/contracts/SuiviDonSang.sol/SuiviDonSang.json", "utf8"),
 );
 
-// 1. Le provider doit être défini AVANT les wallets
 const provider = new JsonRpcProvider("http://127.0.0.1:8545", undefined, {
   staticNetwork: true,
   batchMaxCount: 1,
 });
 
-// 2. Comptes de test publics de Hardhat (sans valeur réelle)
+// Comptes de test publics de Hardhat (sans valeur réelle)
 const cle = (k: string) => new NonceManager(new Wallet(k, provider));
 
 const admin = cle("0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80");
@@ -35,7 +34,16 @@ console.log("=== Deploiement ===");
 const usine = new ContractFactory(artifact.abi, artifact.bytecode, admin);
 const c: any = await usine.deploy();
 await c.waitForDeployment();
-console.log("Contrat deploye a l'adresse :", await c.getAddress());
+const adresse = await c.getAddress();
+console.log("Contrat deploye a l'adresse :", adresse);
+
+// Écrit l'adresse + l'ABI pour le backend
+mkdirSync("../backend/src/blockchain", { recursive: true });
+writeFileSync(
+  "../backend/src/blockchain/contract.json",
+  JSON.stringify({ address: adresse, abi: artifact.abi }, null, 2),
+);
+console.log("contract.json ecrit dans backend/src/blockchain/");
 
 console.log("\n=== Attribution des roles (par l'admin) ===");
 const AGENT_ROLE = await c.AGENT_ROLE();

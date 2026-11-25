@@ -9,7 +9,7 @@ const DONNEUR = ethers.id("donneur-pseudo-1");
 const HASH = ethers.id("resultats-analyse");
 const REF = ethers.id("DEM-2026-0032");
 const MEDECIN = ethers.id("MEDECIN-7");
-
+const MOTIF_HASH = ethers.id("stock insuffisant");
 const ERREUR_STATUT = "Statut incorrect pour cette action";
 const ERREUR_COMPAT = "Groupe incompatible avec le patient";
 
@@ -413,6 +413,93 @@ describe("SuiviDonSang - option A (demandes dans le backend)", function () {
     ).to.be.revertedWith("Limite invalide");
   });
 
+
+
+    // --------------------------------------------------
+  // DÉCISIONS SUR LES DEMANDES
+  // --------------------------------------------------
+
+  it("l'agent refuse une demande : événement émis, statut de la poche inchangé", async function () {
+    const { c, agent } = await deploy();
+    const id = await jusquAuStockage(c, agent, 0);
+
+    await expect(
+      c.connect(agent).refuserDemande(id, REF, MOTIF_HASH)
+    )
+      .to.emit(c, "DemandeTraitee")
+      .withArgs(
+        id,
+        REF,
+        1n, // Refusee
+        MOTIF_HASH,
+        agent.address,
+        (v: bigint) => v > 0n
+      );
+
+    expect((await c.getDon(id)).statut).to.equal(4n); // toujours Stocke
+    expect(await c.demandeDe(id)).to.equal(ethers.ZeroHash);
+  });
+
+  it("permet un refus sans poche (donId = 0, rupture de stock)", async function () {
+    const { c, agent } = await deploy();
+
+    await expect(
+      c.connect(agent).refuserDemande(0n, REF, MOTIF_HASH)
+    )
+      .to.emit(c, "DemandeTraitee")
+      .withArgs(
+        0n,
+        REF,
+        1n,
+        MOTIF_HASH,
+        agent.address,
+        (v: bigint) => v > 0n
+      );
+  });
+
+  it("refuse un refus invalide (sans rôle, don inexistant, référence ou motif vide)", async function () {
+    const { c, agent, medecin, intrus } = await deploy();
+    const id = await jusquAuStockage(c, agent, 0);
+
+       await expect(
+      c.connect(intrus).refuserDemande(id, REF, MOTIF_HASH)
+    ).to.be.revert(ethers);
+
+    await expect(
+      c.connect(medecin).refuserDemande(id, REF, MOTIF_HASH)
+    ).to.be.revert(ethers);
+
+    await expect(
+      c.connect(agent).refuserDemande(99n, REF, MOTIF_HASH)
+    ).to.be.revertedWith("Don introuvable");
+
+    await expect(
+      c.connect(agent).refuserDemande(id, ethers.ZeroHash, MOTIF_HASH)
+    ).to.be.revertedWith("Reference obligatoire");
+
+    await expect(
+      c.connect(agent).refuserDemande(id, REF, ethers.ZeroHash)
+    ).to.be.revertedWith("Motif obligatoire");
+  });
+
+  it("la réservation émet aussi DemandeTraitee (Acceptee, motif vide)", async function () {
+    const { c, agent } = await deploy();
+    const id = await jusquAuStockage(c, agent, 0);
+
+    await expect(c.connect(agent).reserverPoche(id, REF, MEDECIN, 0))
+      .to.emit(c, "DemandeTraitee")
+      .withArgs(
+        id,
+        REF,
+        0n, // Acceptee
+        ethers.ZeroHash,
+        agent.address,
+        (v: bigint) => v > 0n
+      );
+  });
+
+
+
   // --------------------------------------------------
   // COMPATIBILITÉ DES GROUPES SANGUINS
   // --------------------------------------------------
@@ -489,4 +576,119 @@ describe("SuiviDonSang - option A (demandes dans le backend)", function () {
       }
     }
   });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  // À coller dans le describe(...) existant, avant l'accolade finale.
+// Utilise les helpers (deploy, enregistrer, jusquAuStockage) et les constantes déjà définis en haut du fichier.
+
+// --------------------------------------------------
+// CAS MANQUANTS
+// --------------------------------------------------
+
+it("refuse une double réservation de la même poche", async function () {
+  const { c, agent } = await deploy();
+  const id = await jusquAuStockage(c, agent, 0);
+
+  await c.connect(agent).reserverPoche(id, REF, MEDECIN, 0);
+
+  await expect(
+    c.connect(agent).reserverPoche(id, ethers.id("DEM-2026-0099"), MEDECIN, 0)
+  ).to.be.revertedWith(ERREUR_STATUT);
+
+  // La première réservation n'est pas écrasée.
+  expect(await c.demandeDe(id)).to.equal(REF);
 });
+
+it("rejeterDon émet AnalyseEnregistree avec valide = false", async function () {
+  const { c, agent } = await deploy();
+  const id = await enregistrer(c, agent, 0);
+
+  await c.connect(agent).demarrerAnalyse(id);
+
+  await expect(c.connect(agent).rejeterDon(id, HASH))
+    .to.emit(c, "AnalyseEnregistree")
+    .withArgs(id, HASH, false, agent.address, (v: bigint) => v > 0n);
+
+  expect((await c.getDon(id)).statut).to.equal(3n); // Rejete
+});
+
+it("distribuerPoche émet PocheDistribuee avec la référence de la demande", async function () {
+  const { c, agent } = await deploy();
+  const id = await jusquAuStockage(c, agent, 0);
+
+  await c.connect(agent).reserverPoche(id, REF, MEDECIN, 0);
+
+  await expect(c.connect(agent).distribuerPoche(id))
+    .to.emit(c, "PocheDistribuee")
+    .withArgs(id, REF, agent.address, (v: bigint) => v > 0n);
+});
+
+it("refuse de démarrer deux fois l'analyse", async function () {
+  const { c, agent } = await deploy();
+  const id = await enregistrer(c, agent, 0);
+
+  await c.connect(agent).demarrerAnalyse(id);
+
+  await expect(
+    c.connect(agent).demarrerAnalyse(id)
+  ).to.be.revertedWith(ERREUR_STATUT);
+});
+
+it("les dates de l'historique sont croissantes", async function () {
+  const { c, agent } = await deploy();
+  const id = await jusquAuStockage(c, agent, 0);
+
+  const historique = await c.getHistorique(id);
+
+  for (let i = 1; i < historique.length; i++) {
+    expect(historique[i].date >= historique[i - 1].date).to.equal(true);
+  }
+});
+
+it("getHistorique refuse un don inexistant", async function () {
+  const { c } = await deploy();
+
+  await expect(c.getHistorique(99n)).to.be.revertedWith("Don introuvable");
+});
+
+// --------------------------------------------------
+// RÔLES : vérification précise de l'erreur
+// (.to.revert(ethers) accepte n'importe quel échec ; ici on prouve
+//  que le rejet vient bien du contrôle d'accès)
+// --------------------------------------------------
+
+it("annuler une réservation ou distribuer exige le rôle agent", async function () {
+  const { c, agent, intrus } = await deploy();
+  const id = await jusquAuStockage(c, agent, 0);
+
+  await c.connect(agent).reserverPoche(id, REF, MEDECIN, 0);
+
+  const AGENT = await c.AGENT_ROLE();
+
+  await expect(c.connect(intrus).annulerReservation(id, "test"))
+    .to.be.revertedWithCustomError(c, "AccessControlUnauthorizedAccount")
+    .withArgs(intrus.address, AGENT);
+
+  await expect(c.connect(intrus).distribuerPoche(id))
+    .to.be.revertedWithCustomError(c, "AccessControlUnauthorizedAccount")
+    .withArgs(intrus.address, AGENT);
+});
+
+
+  
+});
+
+
+
